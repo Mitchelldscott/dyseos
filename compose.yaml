@@ -1,0 +1,28 @@
+services:
+
+  rpi:
+    image: mdsdev0/devbox:rpi
+
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        # Cargo profile, defaults are debug and release
+        # add more in Cargo.toml then set them here
+        - PROFILE=release
+        # Cargo target, any target should work (but will need to be added to Dockerfile)
+        # Currently have aarch64-unknown-none-softfloat and thumbv7em-none-eabihf
+        - TARGET=aarch64-unknown-none-softfloat
+        # Qemu machine type see dockerfile for qemu version to 
+        # see machines run 'qemu-system-aarch64 -M help' inside the container
+        - MACHINE=raspi3b
+        # Must be blank or defined in Cargo.toml, can also be set entrypoint arg -b
+        - BIN=kernel
+
+    volumes:
+      - ./:/home/dev/dyseos
+
+    ports:
+      - "1234:1234"
+
+    command: [ "-d", "-q", "bash" ]

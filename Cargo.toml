@@ -1,0 +1,48 @@
+[package]
+name = "dyseos"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[workspace.package]
+authors = ["Mitchell Scott <scott.mitchell913@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/MitchellDScott/DyseOS.git"
+
+# This is a convenience for building examples.
+# When a user builds _all_ of the examples with
+# all features, there's likely to be a duplicate
+# definition linker error, since both RTIC and the
+# BSP define USB_OTG1. The linker can figure out
+# which one is actually used when LTO is on.
+[profile.dev]
+lto = "off"
+
+# Don't optimize build dependencies, like proc macros.
+# Helps with build times.
+[profile.dev.build-override]
+opt-level = 0
+
+[profile.release]
+lto = "off"
+
+[profile.release.build-override]
+opt-level = 0
+
+[features]
+default = []
+
+
+##--------------------------------------------------------------------------------------------------
+## Dependencies
+##--------------------------------------------------------------------------------------------------
+
+[dependencies]
+aarch64-cpu = { version = "9.x.x" }
+
+[[bin]]
+name = "kernel"
+path = "src/start.rs"

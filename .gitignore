@@ -1,0 +1,7 @@
+/target
+Cargo.lock
+**/.vscode/
+**/.DS_Store
+**/*.img
+**/*_elf_info.txt
+**/*_structure.txt
