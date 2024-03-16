@@ -17,6 +17,7 @@ RUN apt update && apt upgrade -y             && \
     locales                                     \
     ruby-dev                                    \
     ruby                                        \
+    graphviz                                    \
     curl                                        \
     wget                                        \
     git

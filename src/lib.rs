@@ -5,7 +5,6 @@ use aarch64_cpu::asm;
 use core::arch::asm;
 
 pub mod console;
-pub mod print;
 
 pub mod panic;
 

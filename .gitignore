@@ -5,3 +5,4 @@ Cargo.lock
 **/*.img
 **/*_elf_info.txt
 **/*_structure.txt
+**/*_dump/

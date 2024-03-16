@@ -1,6 +1,6 @@
 use core::{
     ptr::write_volatile,
-    fmt::{Result, Write},
+    fmt::{Result, Write, Arguments},
 };
 
 pub struct Console {
@@ -20,8 +20,39 @@ impl Write for Console {
 }
 
 /// Return a reference to the console.
-pub fn qemu_console() -> Console {
+pub fn console() -> Console {
     Console {
         dst: 0x3F20_1000 as *mut u8,
     } // what is this value...
+}
+
+//--------------------------------------------------------------------------------------------------
+// Public Code
+//--------------------------------------------------------------------------------------------------
+
+#[doc(hidden)]
+pub fn _print(args: Arguments) {
+
+    console().write_fmt(args).unwrap();
+
+}
+
+/// Prints without a newline.
+///
+/// Carbon copy from <https://doc.rust-lang.org/src/std/macros.rs.html>
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ($crate::console::_print(format_args!($($arg)*)));
+}
+
+/// Prints with a newline.
+///
+/// Carbon copy from <https://doc.rust-lang.org/src/std/macros.rs.html>
+#[macro_export]
+macro_rules! println {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ({
+        $crate::console::_print(format_args!($($arg)*));
+        $crate::print!("\n");
+    })
 }

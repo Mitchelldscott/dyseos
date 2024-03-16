@@ -23,6 +23,14 @@ BPurple='\033[1;35m'      # Purple
 BCyan='\033[1;36m'        # Cyan
 BWhite='\033[1;37m'       # White
 
+DATETIME=$(date '+%d%h%y%H%M')
+PROJECT_ROOT=${PWD}
+
+if [[ ! -f ${PROJECT_ROOT}/Cargo.toml ]]; then
+    echo -e "${BRed}No Cargo.toml, Exit${NC}"
+    exit 0
+fi
+
 DUMP="false"
 CLEAN="false"
 QEMU="false"
@@ -32,15 +40,19 @@ DEBUGGER="false"
 
 function usage {
 
-    echo -e "\t${BCyan}Devbox Usage${NC}"
-    echo -e "  ${BGreen}-c${NC} Clean the workspace"
-    echo -e "  ${BGreen}-d${NC} Dump kernel elf info"
-    echo -e "  ${BGreen}-b${NC} Cargo binary to build, from Cargo.toml"
-    echo -e "  ${BGreen}-n${NC} Don't Build the elf or run cargo objcopy"
-    echo -e "  ${BGreen}-q${NC} Run QEMU emulator, requires that bin is the kernel image"
-    echo -e "  ${BGreen}-g${NC} Run QEMU emulator and attach LLDB session, overrides -q"
-    echo -e "  ${BGreen}-p <PROFILE>${NC} Cargo profile to build"
-    echo -e "  ${BGreen}-f <FEATURES>${NC} Cargo features to enable"
+    echo -e "\t${BCyan}Devbox Usage${NC}\n"
+    echo -e "${BGreen}Usage${NC}\tentrypoint.bash <OPTIONS> <COMMAND>\n"
+    echo -e "${BGreen}Compose${NC}\tdocker compose run <SERVICE> <OPTIONS> <COMMAND>\n"
+    echo -e "${BGreen}Options:${NC}"
+    echo -e "  ${BBlue}-c${NC} Clean the workspace"
+    echo -e "  ${BBlue}-d${NC} Dump kernel elf info"
+    echo -e "  ${BBlue}-b${NC} Cargo binary to build, from Cargo.toml"
+    echo -e "  ${BBlue}-n${NC} Don't Build the elf or run cargo objcopy"
+    echo -e "  ${BBlue}-q${NC} Run QEMU emulator, requires that bin is the kernel image"
+    echo -e "  ${BBlue}-g${NC} Run QEMU emulator and attach LLDB session, overrides -q"
+    echo -e "  ${BBlue}-p <PROFILE>${NC} Cargo profile to build"
+    echo -e "  ${BBlue}-f <FEATURES>${NC} Cargo features to enable"
+    echo -e "${BGreen}Command${NC}\teverything after the last option is interpreted as a bash command after the tools execute\n"
 
 }
 
@@ -86,8 +98,14 @@ shift $(( OPTIND - 1 ))
 
 if [[ ${BIN} = "" ]]; then
     BIN_ARG=""
+    DATA_DIR=${PROJECT_ROOT}/dump
 else
     BIN_ARG="--bin ${BIN} "
+    DATA_DIR=${PROJECT_ROOT}/${BIN}_dump
+
+    if [[ ! -d ${DATA_DIR} ]]; then
+        mkdir ${DATA_DIR}
+    fi
 fi
 
 if [[ ${TARGET} = none ]]; then
@@ -113,7 +131,7 @@ if [[ ${CLEAN} = true ]]; then
 
     echo -e "\n\t${BCyan}Cleaning Project${NC}"
     cargo clean ${PROFILE_ARG}${TARGET_ARG}
-    rm /home/dev/dyseos/${BIN}*
+    rm ${DATA_DIR}/*
 
 fi
 
@@ -136,17 +154,21 @@ fi
 if [[ ${DUMP} = true && ${BIN} != "" ]]; then 
     
     echo -e "\n\t${BCyan}Dumping ELF info${NC}"
-    echo "===== objdump =====" > /home/dev/dyseos/${BIN}_elf_info.txt
-    cargo objdump ${BIN_ARG}${PROFILE_ARG}${TARGET_ARG}-- -s -d >> /home/dev/dyseos/${BIN}_elf_info.txt
-    echo "===== nm =====" >> /home/dev/dyseos/${BIN}_elf_info.txt
-    cargo nm ${BIN_ARG}${PROFILE_ARG}${TARGET_ARG}>> /home/dev/dyseos/${BIN}_elf_info.txt
-    echo "===== size =====" >> /home/dev/dyseos/${BIN}_elf_info.txt
-    cargo size ${BIN_ARG}${PROFILE_ARG}${TARGET_ARG}>> /home/dev/dyseos/${BIN}_elf_info.txt
-    cargo modules structure ${BIN_ARG} > ${BIN}_structure.txt
+    echo "===== objdump =====" > ${DATA_DIR}/elf_info_${DATETIME}.txt
+    cargo objdump ${BIN_ARG}${PROFILE_ARG}${TARGET_ARG}-- -d >> ${DATA_DIR}/elf_info_${DATETIME}.txt
+    echo "===== nm =====" >> ${DATA_DIR}/elf_info_${DATETIME}.txt
+    cargo nm ${BIN_ARG}${PROFILE_ARG}${TARGET_ARG}>> ${DATA_DIR}/elf_info_${DATETIME}.txt
+    echo "===== size =====" >> ${DATA_DIR}/elf_info_${DATETIME}.txt
+    cargo size ${BIN_ARG}${PROFILE_ARG}${TARGET_ARG}>> ${DATA_DIR}/elf_info_${DATETIME}.txt
+    cargo modules structure ${BIN_ARG} > ${DATA_DIR}/structure_${DATETIME}.txt
+    cargo modules dependencies ${BIN_ARG} --no-sysroot > ${DATA_DIR}/depends.dot
+    dot -Tpng ${DATA_DIR}/depends.dot -o ${DATA_DIR}/depends_${DATETIME}.png
     
     if [[ -f "${PROJECT_ROOT}/src/lib.rs" ]]; then
     
-        cargo modules structure --lib >> ${BIN}_structure.txt
+        cargo modules structure --lib >> ${DATA_DIR}/structure.txt
+        cargo modules dependencies --lib --no-sysroot > ${DATA_DIR}/lib_depends.dot
+        dot -Tpng ${DATA_DIR}/lib_depends.dot -o ${DATA_DIR}/lib_depends_${DATETIME}.png
 
     fi
 
@@ -169,7 +191,7 @@ if [[ ${MACHINE} != none && ${QEMU} = true ]]; then
 
 fi
 
-if [[ $1 != "" ]]; then
+if [[ $1 != "" && $1 != " " ]]; then
 
     $@
 

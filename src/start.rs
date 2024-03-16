@@ -5,8 +5,7 @@
 use dyseos;
 
 #[no_mangle]
-pub unsafe fn _kernel_init() -> ! {
+unsafe fn _kernel_init() -> ! {
     panic!("Reached end of existing kernel... more coming soon!");
 }
-
 
