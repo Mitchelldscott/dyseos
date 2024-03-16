@@ -48,6 +48,12 @@ docker compose run rpi -n -g bash
 # the rust dump tools will also build the project so this is safe
 docker compose run rpi -n -d cat <BIN>_structure.txt
 ```
+
+```
+     # Example
+# run the devbox with another cargo project in debug mode, then run cargo tests
+docker run -it -v ${PWD}:/home/dev/dyseos mdsdev0/devbox:rpi -d -b binary -p debug cargo test
+```
      
  - On a push to master Github actions will publish new docker images
  - Devboxes use lldb as the debugger not gdb
