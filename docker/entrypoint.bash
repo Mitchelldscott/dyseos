@@ -166,7 +166,7 @@ if [[ ${DUMP} = true && ${BIN} != "" ]]; then
     
     if [[ -f "${PROJECT_ROOT}/src/lib.rs" ]]; then
     
-        cargo modules structure --lib >> ${DATA_DIR}/structure.txt
+        cargo modules structure --lib >> ${DATA_DIR}/structure_${DATETIME}.txt
         cargo modules dependencies --lib --no-sysroot > ${DATA_DIR}/lib_depends.dot
         dot -Tpng ${DATA_DIR}/lib_depends.dot -o ${DATA_DIR}/lib_depends_${DATETIME}.png
 
