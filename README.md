@@ -8,9 +8,9 @@ The key differences are:
  
  - No more Makefiles, builds are done in docker by a bash script
 
-  > Docker images (devbox) are built by docker-compose services and provides cargo, llvm and qemu
-  > Docker compose services configure the workspace for specific boards
-  > Published devboxes can be used to build the published kernel or another cargo project
+  > Docker images (devbox) are built by docker-compose services and provides cargo, llvm and qemu \
+  > Docker compose services configure the workspace for specific boards \
+  > Published devboxes can be used to build the published kernel or another cargo project \
   > The entrypoint provides a single command to run many different cargo tools
      
      docker compose run <SERVICE> <OPTIONS> <CMD>
