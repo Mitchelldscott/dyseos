@@ -20,6 +20,6 @@ jobs:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_TOKEN }}
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@master
     - name: Build the RPi Docker image
       run: docker compose build rpi && docker compose push rpi
