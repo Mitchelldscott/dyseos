@@ -30,21 +30,35 @@ BUILD="true"
 FEATURES=""
 DEBUGGER="false"
 
-while getopts "bndcqgp:f:" flag; do
+function usage {
+
+    echo -e "\t${BCyan}Devbox Usage${NC}"
+    echo -e "  ${BGreen}-c${NC} Clean the workspace"
+    echo -e "  ${BGreen}-d${NC} Dump kernel elf info"
+    echo -e "  ${BGreen}-b${NC} Cargo binary to build, from Cargo.toml"
+    echo -e "  ${BGreen}-n${NC} Don't Build the elf or run cargo objcopy"
+    echo -e "  ${BGreen}-q${NC} Run QEMU emulator, requires that bin is the kernel image"
+    echo -e "  ${BGreen}-g${NC} Run QEMU emulator and attach LLDB session, overrides -q"
+    echo -e "  ${BGreen}-p <PROFILE>${NC} Cargo profile to build"
+    echo -e "  ${BGreen}-f <FEATURES>${NC} Cargo features to enable"
+
+}
+
+while getopts "bndcqgp:f:h" flag; do
     case $flag in
         b) # Cargo binary to build
             BIN=${OPTARG}
         ;;
-        n) # build the elf and copy to img, defaults to true; the opposite of dump and clean
+        n) # Don't Build the elf or run cargo objcopy
             BUILD="false"
         ;;
-        d) # dump kernel elf info
+        d) # Dump kernel elf info
             DUMP="true"
         ;;
-        c) # clean build
+        c) # Clean the workspace
             CLEAN="true"
         ;;
-        q) # run qemu emulator
+        q) # Run qemu emulator
             QEMU="true"
         ;;
         q) # run qemu emulator with debugger (forces -q)
@@ -58,7 +72,12 @@ while getopts "bndcqgp:f:" flag; do
             FEATURES=${OPTARG}
             FEATURES_ARG=--features=${OPTARG}
         ;;
+        h)
+            usage
+            exit 0
+        ;;
         \?) # Handle invalid options
+            usage
         ;;
     esac
 done
