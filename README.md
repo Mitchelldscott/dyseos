@@ -11,7 +11,7 @@ The key differences are:
   > Docker images (devbox) are built by docker-compose services and provides cargo, llvm and qemu \
   > Docker compose services configure the workspace for specific boards \
   > Published devboxes can be used to build the published kernel or another cargo project \
-  > The entrypoint provides a single command to run many different cargo tools \
+  > The entrypoint provides a single command to run many different cargo tools
      
      docker compose run <SERVICE> <OPTIONS> <CMD>
 
