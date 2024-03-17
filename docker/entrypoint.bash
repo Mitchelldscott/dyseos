@@ -73,7 +73,7 @@ while getopts "bndcqgp:f:h" flag; do
         q) # Run qemu emulator
             QEMU="true"
         ;;
-        q) # run qemu emulator with debugger (forces -q)
+        g) # run qemu emulator with debugger (forces -q)
             QEMU="true"
             DEBUGGER="true"
         ;;
