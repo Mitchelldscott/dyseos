@@ -9,6 +9,33 @@ Shout out Andre Richter.
   - https://github.com/rust-embedded/cargo-binutils
   - https://github.com/regexident/cargo-modules
 
+  ## LLDB is the default debugger
+
+  ## Github Actions are configured to build and publish images from master
+
+  ## Kernel docs
+
+  To generate the docs for the source code use cargo
+
+```
+# --open will open the docs in a browser
+cargo doc --open --document-private-items
+```
+
+  If cargo is not available locally call it from a container
+
+```
+#  The -n option is optional... but it stops the container from building the source.
+docker compose run rpi -n cargo doc --document-private-items
+```
+
+  If the docker image needs to be rebuilt before building docs... for some reason
+
+```
+docker compose run --build rpi -n cargo doc --document-private-items
+```
+
+
   ## All you need is docker
 
   All dependencies and targets are installed in a docker image and published to dockerhub with the 
@@ -67,10 +94,6 @@ Docker compose can only be used in this repo, to build an external project use
   > **-it** enables colored prints and such (might source ~/.bashrc before entrypoint) \
   > **OPTIONS** entrypoint options \
   > **CMD** post entry command + args
-
-  ## On a push to origin master Github actions will publish new docker images
-
-  ## LLDB is the default debugger
 
 <details closed><summary>Devbox Examples</summary>
 

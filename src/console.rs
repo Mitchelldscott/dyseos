@@ -27,7 +27,7 @@ use core::{
 /// Stores nothing but implements the [core::fmt::Write] trait and the required 
 /// [Console::write_str()] function. The print functions use this to write data, the 
 /// implementation defines where the data will end up. The console is public, so everything in 
-/// [dyseos] can use it. [_print()] provides a public interface to this.
+/// [crate] can use it. [_print()] provides a public interface to this.
 struct Console {}
 
 impl Write for Console {

@@ -125,13 +125,16 @@ echo -e "  ${BGreen}Architecture${NC}:\t${TARGET}"
 echo -e "  ${BGreen}Profile${NC}:\t${PROFILE}"
 echo -e "  ${BGreen}Features${NC}:\t${FEATURES}"
 echo -e "  ${BGreen}Machine${NC}:\t${MACHINE}"
-echo -e "  ${BGreen}CMD${NC}:\t\t$1"
+echo -e "  ${BGreen}CMD${NC}:\t\t$1\n"
 
 if [[ ${CLEAN} = true ]]; then
 
     echo -e "\n\t${BCyan}Cleaning Project${NC}"
     cargo clean ${PROFILE_ARG}${TARGET_ARG}
-    rm ${DATA_DIR}/*
+
+    if [[ -f ${DATA_DIR}/* ]]; then
+        rm ${DATA_DIR}/*
+    fi
 
 fi
 
@@ -192,6 +195,8 @@ if [[ ${MACHINE} != none && ${QEMU} = true ]]; then
 fi
 
 if [[ $1 != "" && $1 != " " ]]; then
+
+    echo -e "\n\t${BCyan}System Command${NC}\n$@\n"
 
     $@
 

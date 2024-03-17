@@ -38,7 +38,7 @@ pub mod panic;
 /// # Start code
 ///
 /// If on the boot core starts the kernel, if not parks it.
-/// Also initializes the bss section by calling [_init_section()]. This code is
+/// Also initializes the bss section by calling [_init_mem()]. This code is
 /// linked to the beggining of the .text section by the linker script.
 ///
 /// ### TODO:
