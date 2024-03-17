@@ -22,12 +22,13 @@ use core::{
     fmt::{Result, Write, Arguments},
 };
 
-/// Console for printing
+/// Console
 ///
-/// Stores nothing but implements the [core::fmt::Write] trait and the required 
-/// [Console::write_str()] function. The print functions use this to write data, the 
-/// implementation defines where the data will end up. The console is public, so everything in 
-/// [crate] can use it. [_print()] provides a public interface to this.
+/// Implements the required [Console::write_str()] function for the trait [core::fmt::Write]. 
+///
+/// The print functions use this to write data, the implementation defines where the data will end up.
+/// [_print()] provides a public wrapper to this interface so external projects can use it 
+/// (thats how its used in start.rs).
 struct Console {}
 
 impl Write for Console {
@@ -51,8 +52,10 @@ fn console() -> Console {
 // Public Code
 //--------------------------------------------------------------------------------------------------
 
-/// Base print implementation, uses the consoles trait to provide the
-/// classic rust print interface.
+/// Base print implementation
+///
+/// Uses a Console to provide the classic rust print interface. Users should 
+/// call [crate::print] or [crate::println] not this.
 pub fn _print(args: Arguments) {
 
     console().write_fmt(args).unwrap();
