@@ -28,6 +28,7 @@
 ///
 /// [`AtomicBool::load`]: core::sync::atomic::AtomicBool::load
 /// [`AtomicBool::store`]: core::sync::atomic::AtomicBool::store
+#[no_mangle]
 fn panic_prevent_reenter() {
     use core::sync::atomic::{AtomicBool, Ordering};
 
@@ -60,7 +61,6 @@ fn panic_prevent_reenter() {
 ///
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
-
     // Protect against panic infinite loops if any of the following code panics itself.
     panic_prevent_reenter();
 
@@ -69,12 +69,7 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
         _ => ("???", 0),
     };
 
-    crate::println!(
-        "Kernel panicked at {}:{}\t{:?}",
-        location, 
-        line,
-        info,
-    );
+    crate::println!("Kernel panicked at {}:{}\n{:?}", location, line, info,);
 
     crate::_park();
 }

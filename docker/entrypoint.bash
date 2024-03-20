@@ -26,9 +26,14 @@ BWhite='\033[1;37m'       # White
 DATETIME=$(date '+%d%h%y%H%M')
 PROJECT_ROOT=${PWD}
 
+if [[ ! -d ${PROJECT_ROOT} ]]; then
+    echo -e "${BRed}Project Root does not exist, Exit${NC}"
+    exit 1
+fi
+
 if [[ ! -f ${PROJECT_ROOT}/Cargo.toml ]]; then
     echo -e "${BRed}No Cargo.toml, Exit${NC}"
-    exit 0
+    exit 1
 fi
 
 DUMP="false"
@@ -102,10 +107,6 @@ if [[ ${BIN} = "" ]]; then
 else
     BIN_ARG="--bin ${BIN} "
     DATA_DIR=${PROJECT_ROOT}/${BIN}_dump
-
-    if [[ ! -d ${DATA_DIR} ]]; then
-        mkdir ${DATA_DIR}
-    fi
 fi
 
 if [[ ${TARGET} = none ]]; then
@@ -132,8 +133,8 @@ if [[ ${CLEAN} = true ]]; then
     echo -e "\n\t${BCyan}Cleaning Project${NC}"
     cargo clean ${PROFILE_ARG}${TARGET_ARG}
 
-    if [[ -f ${DATA_DIR}/* ]]; then
-        rm ${DATA_DIR}/*
+    if [[ -d ${DATA_DIR} ]]; then
+        rm -rf ${DATA_DIR}
     fi
 
 fi
@@ -155,6 +156,10 @@ if [[ $BUILD = true ]]; then
 fi
 
 if [[ ${DUMP} = true && ${BIN} != "" ]]; then 
+
+    if [[ ! -d ${DATA_DIR} ]]; then
+        mkdir ${DATA_DIR}
+    fi
     
     echo -e "\n\t${BCyan}Dumping ELF info${NC}"
     echo "===== objdump =====" > ${DATA_DIR}/elf_info_${DATETIME}.txt
@@ -183,7 +188,7 @@ if [[ ${MACHINE} != none && ${QEMU} = true ]]; then
     
     if [[ ${DEBUGGER} = true ]]; then
 
-        qemu-system-aarch64 -M ${MACHINE} -kernel ${PROJECT_ROOT}/${BIN}.img -gdb tcp::1234 -S -serial stdio -display none &
+        qemu-system-aarch64 -M ${MACHINE} -gdb tcp::1234 -S -serial stdio -display none &
         lldb --one-line "gdb-remote localhost:1234" target/${TARGET}/${PROFILE}/${BIN}
 
     else

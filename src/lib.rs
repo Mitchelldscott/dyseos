@@ -9,18 +9,21 @@
  *
  *
  ********************************************************************************/
-//! # DyseOS 
+//! # DyseOS
 //!
 //! Library with bsp and boot routines for the RaspberryPi-3b,
 //! more boards coming much later. The source is almost entirely
-//! copied from the rust tutorials by Andre Richter <https://github.com/embedded-rust/rust/raspberrypi-OS-tutorials.git>.
+//! copied from the rust tutorials by Andre Richter.
 //!
 //! Author: Mitchell Scott <scott.mitchell913@gmail.com>
+//!
+//! ## Resources:
+//!
+//!   - <https://github.com/embedded-rust/rust/raspberrypi-OS-tutorials.git>
 //!
 
 // Well documented code is happy code
 #![warn(missing_docs)]
-
 // None of that S#!t
 #![no_std]
 #![no_main]
@@ -30,10 +33,12 @@ use aarch64_cpu::asm;
 // This is cool but the asm script seems more productive
 use core::arch::asm;
 
-/// Stdout console
-pub mod console;
-/// Panic implementation
+/// Hacky QEMU console
+pub mod drivers;
+/// Panic
 pub mod panic;
+/// Syncronization primatives
+pub mod sync;
 
 /// # Start code
 ///
@@ -109,28 +114,26 @@ unsafe fn _start() -> ! {
 #[link_section = ".text._init_mem"]
 #[no_mangle]
 unsafe fn _init_mem() {
-
     extern "C" {
         static mut _sbss: u8;
         static _ebss: u8;
     }
-    
+
     let count = &_ebss as *const u8 as usize - &_sbss as *const u8 as usize;
     core::ptr::write_bytes(&mut _sbss as *mut u8, 0, count);
-
 }
 
 /// Park the core
 ///
 /// loops and waits for an event.
-/// 
+///
 /// ### Disassembly
 /// ```
-/// 
+///
 /// 0000000000080054 <_park>:
 ///    80054: d503205f     	wfe
 ///    80058: 17ffffff     	b	0x80054 <_park>
-/// 
+///
 /// ```
 #[link_section = ".text._park"]
 #[no_mangle]
