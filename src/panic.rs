@@ -43,7 +43,7 @@ fn panic_prevent_reenter() {
         return;
     }
 
-    crate::_park()
+    crate::cpu::_park();
 }
 
 /// # Panic handler
@@ -71,5 +71,5 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
 
     crate::println!("Kernel panicked at {}:{}\n{:?}", location, line, info,);
 
-    crate::_park();
+    crate::cpu::_park();
 }

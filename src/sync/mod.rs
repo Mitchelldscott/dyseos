@@ -24,5 +24,3 @@
 //!   - <https://doc.rust-lang.org/std/sync/index.html>
 
 pub mod mutex;
-#[cfg(test)]
-pub mod mutex_test;

@@ -9,14 +9,26 @@
  *
  *
  ********************************************************************************/
-//! # DyseOS Mutual Exclusion primative
-//!
+//! # DyseOS Boot routines
 //!
 //! Author: Mitchell Scott <scott.mitchell913@gmail.com>
+//!
+//! ## Resources:
+//!
 
-use super::*;
+// pub trait CPU {
+//     fn _start() -> ! { loop {  } };
 
-#[test]
-fn test_add() {
-    let mutex = Mutex(0.0f64);
-}
+//     fn _init_mem() -> ! { loop {  } };
+
+//     fn _park() -> ! { loop {  } };
+
+//     fn _spin_n(n: usize) ->  { for _ in 0..n {  } };
+
+// }
+
+#[cfg(target_arch = "aarch64")]
+pub mod aarch64;
+
+#[cfg(target_arch = "aarch64")]
+pub use self::aarch64::{_park, _spin_n};

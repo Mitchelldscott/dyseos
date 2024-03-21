@@ -25,6 +25,9 @@
 //!
 
 #[derive(Debug)]
+/// An error type for the mutex
+///
+/// Allows printing a custom message with [format_args!()]
 pub struct LockError;
 
 /// Allows printing the error
@@ -61,6 +64,19 @@ unsafe impl<T: ?Sized + Send> Sync for Mutex<T> {}
 /// This guard should only be constructed from a [Mutex]. The guard will unlock the mutex when it
 /// is dropped (by call or scope). A mutex will only give out a single guard at a time, this allows
 /// mutable borrowing of the data.
+///
+/// ### Dev note
+///
+/// The lifetime of [Mutex] must be longer than the lifetime of any constructed [MutexGuard]s.
+///
+/// std::sync::mutex packages a reference to the mutex in the guard. 
+/// This requires the mutex be able to mutate it's data and is not considered typestate programming.
+///
+/// This guard contains references to the feilds of the mutex. 
+///
+/// ### Examples
+/// see [crate::drivers::console]
+///
 pub struct MutexGuard<'a, T: ?Sized + 'a> {
     futex: &'a core::sync::atomic::AtomicBool,
     data: &'a core::cell::UnsafeCell<T>,
@@ -94,7 +110,11 @@ impl<T> Mutex<T> {
 
 impl<T: ?Sized> Mutex<T> {
 
-    pub fn as_guard(&self) -> MutexGuard<'_, T> {
+    /// Builds a [MutexGuard] from a [Mutex]
+    ///
+    /// This can only be used when the lock is already aquired, otherwise accessing the 
+    /// guard's feilds is UB.
+    fn as_guard(&self) -> MutexGuard<'_, T> {
         MutexGuard {
             futex: &self.futex,
             data: &self.data,
@@ -112,12 +132,20 @@ impl<T: ?Sized> Mutex<T> {
     /// use dyseos::sync::Mutex;
     ///
     /// let mutex = Mutex::new(0);
-    /// match mutex.lock() {
-    ///     Ok(raii_guard) => {   
+    /// match mutex.try_lock() {
+    ///     Some(raii_guard) => {   
     ///         
-    ///         raii_guard
-    ///
+    ///         // immutable borrow
+    ///         {
+    ///             let data = &*raii_guard;
+    ///         }
+    ///     
+    ///         // mutable borrow
+    ///         {
+    ///             let data = &mut *raii_guard;
+    ///         }
     ///     }
+    ///     None => {},
     /// }
     ///
     /// ```
@@ -132,7 +160,34 @@ impl<T: ?Sized> Mutex<T> {
             Err(_) => None,
         }
     }
-
+    
+    /// Aquire the [MutexGuard]
+    ///
+    /// Loops until the timeout is reached or the lock is aquired. Underneath this uses [Mutex::try_lock()].
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use dyseos::sync::Mutex;
+    ///
+    /// let mutex = Mutex::new(0);
+    /// match mutex.lock() {
+    ///     Ok(raii_guard) => {   
+    ///         
+    ///         // immutable borrow
+    ///         {
+    ///             let data = &*raii_guard;
+    ///         }
+    ///     
+    ///         // mutable borrow
+    ///         {
+    ///             let data = &mut *raii_guard;
+    ///         }
+    ///     }
+    ///     Err(e) => println!("{e:?}"),
+    /// }
+    ///
+    /// ```
     pub fn lock(&self) -> Result<MutexGuard<'_, T>, LockError> {
         for _ in 0..100 {
             // should timeout be a user input? if so no need for futex_wait()
